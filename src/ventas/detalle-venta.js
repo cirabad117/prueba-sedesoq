@@ -10,13 +10,10 @@ class DetalleVenta extends PolymerElement {
                     display:block;
                 }
             </style>
-
-<h6>Cliente elegido <span class="badge badge-primary">[[objetoVenta.cliente.razon]]</span></h6>
-           
             
-           
+            <h6>Cliente elegido <span class="badge badge-primary">[[objetoVenta.cliente.razon]]</span></h6>
 
-            <h6>ticket de compra</h6>
+            <h5>ticket de compra</h5>
             <paper-listbox style="overflow-y:scroll;max-height:170px;">
                 <template is="dom-repeat" items="[[objetoVenta.listaArticulos]]">
                     

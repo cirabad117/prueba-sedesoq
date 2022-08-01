@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": "build/es6-bundled",
+    "site": "ccruz-test",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

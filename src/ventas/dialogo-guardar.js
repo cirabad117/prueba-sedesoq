@@ -59,11 +59,12 @@ class DialogoGuardar extends DialogLayoutMixin(PolymerElement) {
             clientes:{type:Array, notify:true, value:[]},
             cliente:{type:Object, notify:true},
             venta:{type:Array, notify:true, value:[]},
-            total:{type:Number, notify:true}
+            total:{type:Number, notify:true},
+            productos:{type:Array, notify:true, value:[]},
         }
     }
 
-    constructor(cl,ve,to) {
+    constructor(cl,ve,to,pr) {
         super();
 
         if(cl){
@@ -76,6 +77,10 @@ class DialogoGuardar extends DialogLayoutMixin(PolymerElement) {
         }
         if(to){
             this.set("total",to);
+        }
+
+        if(pr){
+            this.set("productos",pr)
         }
     }
 
@@ -101,6 +106,7 @@ class DialogoGuardar extends DialogLayoutMixin(PolymerElement) {
         firebase.firestore().collection("ventas").add(venta)
         .then((docRef) => {
             PolymerUtils.Toast.show("Venta guardada con exito");
+            t.actualizaInventario(t.venta);
             t.DialogLayout_closeDialog();
            
         })
@@ -108,6 +114,48 @@ class DialogoGuardar extends DialogLayoutMixin(PolymerElement) {
             console.error("Error adding document: ", error);
             PolymerUtils.Toast.show("Error al guardar");
         });
+    }
+
+    actualizaInventario(arr){
+        console.log("venta",arr);
+
+        var db=firebase.firestore();
+        
+        var batch = db.batch();
+        
+       
+        
+        
+        for (var i=0;i<arr.length;i++){
+
+            var idProducto=arr[i].idProducto;
+            var cantidad=arr[i].cantidad;
+
+            var prod=PolymerUtils.cloneObject(this.productos);
+
+            var id=DataHelper.findIndexArrayWithKey(prod,idProducto,"id");
+            var editar=prod[id];
+            console.log("editar",editar);
+
+            var nuevaCantidad=editar.inventario-cantidad;
+
+            var sfRef = db.collection("productos").doc(idProducto);
+            batch.update(sfRef, {"inventario": nuevaCantidad});
+            
+            
+        }
+
+        batch.commit().then(() => {
+            console.log("se actualizaron las cantidades");
+        });
+
+
+    }
+
+    firebaseTrigger(id,cantidad){
+
+
+       
     }
 }
 

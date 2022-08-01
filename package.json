@@ -8,6 +8,7 @@
   "scripts": {
     "start": "polymer serve",
     "build": "polymer build",
+    "build-big": "node --max-old-space-size=8192 C:\\Users\\cir_a\\AppData\\Roaming\\npm\\node_modules\\polymer-cli\\bin\\polymer.js build",
     "lint": "polymer lint",
     "test": "polymer test",
     "test:integration": "polymer build # test that psk builds without error with the CLI"

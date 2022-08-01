@@ -10,6 +10,7 @@
 
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { setPassiveTouchGestures, setRootPath } from '@polymer/polymer/lib/utils/settings.js';
+import { AuthMixin } from "./mixins/auth-mixin.js";
 import '@polymer/app-layout/app-drawer/app-drawer.js';
 import '@polymer/app-layout/app-drawer-layout/app-drawer-layout.js';
 import '@polymer/app-layout/app-header/app-header.js';
@@ -26,6 +27,8 @@ import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-button/paper-button.js';
 import './my-icons.js';
 
+import './my-inicio-sesion.js';
+
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
 setPassiveTouchGestures(true);
@@ -34,7 +37,7 @@ setPassiveTouchGestures(true);
 // in `index.html`.
 setRootPath(MyAppGlobals.rootPath);
 
-class MyApp extends PolymerElement {
+class MyApp extends AuthMixin(PolymerElement) {
   static get template() {
 	return html`
 	  <style>
@@ -87,9 +90,14 @@ class MyApp extends PolymerElement {
 		<app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
 		  <app-toolbar>Menu</app-toolbar>
 		  <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+			
+			<template is="dom-if" if="[[_loggedUser]]" restamp>
 			<a name="clientes" href="[[rootPath]]clientes">Clientes</a>
 			<a name="productos" href="[[rootPath]]productos">Productos</a>
 			<a name="ventas" href="[[rootPath]]ventas">Ventas</a>
+			</template>
+			
+			
 		  </iron-selector>
 		</app-drawer>
 
@@ -100,9 +108,20 @@ class MyApp extends PolymerElement {
 			<app-toolbar>
 			  <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
 			  <div main-title="">My App</div>
+			  <template is="dom-if" if="[[!_loggedUser]]" restamp>
+				
+				<paper-button raised on-click="iniciaSesion">iniciar sesion</paper-button>
+				
+			  </template>
+			  <template is="dom-if" if="[[_loggedUser]]" restamp>
+				
+				<paper-button raised on-click="cierraSesion">cerrar sesion</paper-button>
+				
+			  </template>
 			</app-toolbar>
 		  </app-header>
 
+		  <template is="dom-if" if="[[_loggedUser]]" restamp>
 		  <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
 			<my-clientes name="clientes" lista-clientes="[[listaClientes]]"></my-clientes>
 			<my-productos name="productos" lista-prods="[[listaProds]]"></my-productos>
@@ -110,6 +129,7 @@ class MyApp extends PolymerElement {
 			
 			<my-view404 name="view404"></my-view404>
 		  </iron-pages>
+		  </template>
 		</app-header-layout>
 	  </app-drawer-layout>
 	`;
@@ -163,6 +183,28 @@ class MyApp extends PolymerElement {
 	return [
 	  '_routePageChanged(routeData.page)'
 	];
+  }
+
+  iniciaSesion(){
+	PolymerUtils.Dialog.createAndShow({
+		type: "modal",
+		title:"iniciar sesión",
+		element:"my-inicio-sesion",
+		style:"width:300px;",
+	
+		negativeButton: {
+			text: "Cerrar",
+			action: function(dialog, element) {
+				dialog.close();
+			}
+		}
+	});
+  }
+
+  cierraSesion(){
+	this.signOut();
+		
+	
   }
 
   _routePageChanged(page) {

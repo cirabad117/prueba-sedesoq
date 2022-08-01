@@ -43,7 +43,7 @@ class MyVentas extends PolymerElement {
                             <iron-pages selected="{{selected}}" attr-for-selected="name">
                                 <div name="caja">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-6">
                                             <div class="d-flex flex-wrap">
                                                 <template is="dom-repeat" items="[[listaProds]]">
                                                     <paper-item class="m-1 bg-primary text-white" style="width:150px;" on-click="agregaArticulo">
@@ -56,7 +56,7 @@ class MyVentas extends PolymerElement {
                                                 </template>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <carrito-venta style="border-radius:10px; border: solid 1px var(--paper-blue-500);"
                                             id="carrito" on-guarda-venta="finalizaVenta"></carrito-venta>
                                         </div>
@@ -95,7 +95,6 @@ class MyVentas extends PolymerElement {
 
     agregaArticulo(e){
         var art=e.model.item;
-        console.log("articulo",art);
         
         this.shadowRoot.querySelector("#carrito").pushArticulo(art);
 
@@ -104,20 +103,26 @@ class MyVentas extends PolymerElement {
     finalizaVenta(e){
         var venta=e.detail.lista;
         var total=e.detail.total;
+        var productos=this.listaProds;
         var cl=PolymerUtils.cloneObject(this.listaClientes);
         if(!venta || venta.length<=0){
             return PolymerUtils.Toast.show("Error. la lista esta vacia");
         }
+
+        var t=this;
+       
         PolymerUtils.Dialog.createAndShow({
 			type: "modal",
             title:"guardar venta",
-            params:[cl,venta,total],
+            params:[cl,venta,total,productos],
 			element:"dialogo-guardar",
             style:"width:300px;",
 			positiveButton: {
                 text: "Guardar",
                 action: function(dialog, element) {
                     element.guardaVenta();
+                    t.shadowRoot.querySelector("#carrito").listaVenta=[];
+                    
                 }
             },
             negativeButton: {

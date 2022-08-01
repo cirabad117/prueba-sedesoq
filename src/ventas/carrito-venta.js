@@ -1,9 +1,10 @@
 import {PolymerElement, html} from '@polymer/polymer/polymer-element.js';
 
 import '@polymer/paper-listbox/paper-listbox.js';
-import '@polymer/paper-item/paper-icon-item.js';
-import '@polymer/paper-item/paper-item-body.js';
+
 import '@polymer/paper-button/paper-button.js';
+
+import './item-venta.js';
 
 
 class CarritoVenta extends PolymerElement {
@@ -18,16 +19,9 @@ class CarritoVenta extends PolymerElement {
 
             <h3>mi carrito</h3>
             <paper-listbox style="overflow-y:scroll;max-height:250px;">
-                <template is="dom-repeat" items="[[listaVenta]]">
+                <template is="dom-repeat" items="{{listaVenta}}" id="repeat-lista">
                     
-                    <paper-icon-item >
-                       <span slot="item-icon">[[item.cantidad]]</span> 
-                        <paper-item-body>
-                            <div> [[item.producto]]</div>
-                            <div secondary>[[item.subtotal]]</div>
-                           
-                        </paper-item-body>
-                    </paper-icon-item>
+                    <item-venta item="{{item}}" cantidad="{{item.cantidad}}" subtotal="{{item.subtotal}}" arreglo="{{listaVenta}}" on-modifica="cambiaVenta"></item-venta>
                     
                 </template>
 
@@ -83,6 +77,15 @@ class CarritoVenta extends PolymerElement {
 
         this.set("listaVenta",arreglo);
     }
+    cambiaVenta(e){
+        var nuevo=e.detail.arreglo;
+        var li=PolymerUtils.cloneObject(nuevo);
+        this.set("listaVenta",li);
+       
+    }
+
+    
+
 
     guardaVenta(){
         var t=this;
