@@ -3,6 +3,11 @@ import {PolymerElement, html} from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+
+
+import './clientes/dialogo-cliente.js';
+
 import './bootstrap.js';
 
 
@@ -17,26 +22,10 @@ class MyClientes extends PolymerElement {
 
             <div class="container-fluid">
                 <div class="card">
-                    <div class="card-header d-flex">
+                    <div class="card-header ">
                         <h4>Clientes</h4>
-                        <button type="button" class="btn btn-primary ml-auto" on-click="cambiaNuevoCliente">agregar cliente</button>
                        
                     </div>
-
-                    <template is="dom-if" if="{{bolCliente}}" restamp>
-                        
-                        <paper-input id="txt-rz" label="Razón social" value="{{razon}}"></paper-input>
-                        <paper-input id="txt-dir" label="Dirección" value="{{direccion}}"></paper-input>
-                        <paper-input id="txt-tel" label="Teléfono" value="{{telefono}}"></paper-input>
-
-                        <div class="d-flex">
-                            <button type="button" class="btn btn-success m-1" on-click="accionaNuevoCliente">guardar</button>
-                            <button type="button" class="btn btn-secondary m-1" on-click="cambiaNuevoCliente">cancelar</button>
-
-                        </div>
-                        
-                    </template>
-
 
                     <div class="card-body">
                         <div class="row">
@@ -49,6 +38,7 @@ class MyClientes extends PolymerElement {
                                                 <th>Razón Social</th>
                                                 <th>Dirección</th>
                                                 <th>Telefono</th>
+                                                <th>acciones</th>
                                                 
                                             </tr>
                                         </thead>
@@ -58,6 +48,12 @@ class MyClientes extends PolymerElement {
                                                     <td>[[item.razon]]</td>
                                                     <td>[[item.direccion]]</td>
                                                     <td>[[item.telefono]]</td>
+                                                    <td>
+                                                        
+                                                        <paper-icon-button icon="create" on-click="editaCliente"></paper-icon-button>
+                                                        <paper-icon-button icon="clear" on-click="eliminaCliente"></paper-icon-button>
+                                                        
+                                                    </td>
                                                 </tr>
                                             </template>
                                         </tbody>
@@ -68,6 +64,12 @@ class MyClientes extends PolymerElement {
                     </div>
                 </div>
             </div>
+
+            <div style="position: fixed; bottom: 24px; right: 24px;">
+                <div style="position: relative; cursor:pointer;" on-clicK="abreNuevo">
+                    <paper-fab style="color:white; background-color:var(--paper-blue-500);" icon="add"></paper-fab>
+                </div>
+            </div>
             
 
         `;
@@ -76,103 +78,98 @@ class MyClientes extends PolymerElement {
     static get properties() {
         return {
             listaClientes:{type:Array, notify:true,value:[]},
-            nuevoClientes:{type:Array, notify:true,value:[]},
-            bolCliente:{type:Boolean, notify:true, value:false},
 
-            razon:{type:String, notify:true},
-            direccion:{type:String, notify:true},
-            telefono:{type:String, notify:true}
 
         }
     }
     
-    static get observers() {
-        return [
-            '_changed(listaClientes,listaClientes.*)'
-        ];
-    }
+  
 
-    constructor() {
-        super();
-    }
+   
 
     ready() {
         super.ready();
-        var arr=[];
-        firebase.firestore().collection("clientes").onSnapshot((querySnapshot) => {
-           
-           querySnapshot.forEach((doc) => {
-               var item=doc.data();
-               var cliente={
-                   _id:doc.id,
-                   razon:item.razon,
-                   direccion:item.direccion,
-                   telefono:item.telefono
-               }
-               arr.push(cliente);
-           });
-           
-       });
-       console.log("vista clientes",arr);
-       this.set("listaClientes",arr);
+       
        
        
     }
 
-    _changed(arr){
-        
-            console.log("_changed",arr);
-            var nuevo=[];
-            for(var i=0;i<arr.length;i++){
-                nuevo.push(arr[i]);
-            }
-            this.set("nuevoClientes",nuevo);
-            console.log("nuevoClientes",this.nuevoClientes);
-            this.shadowRoot.querySelector("#repeat-clientes").render();
-        
-        
-    }
-
-    cambiaNuevoCliente(){
-        this.set("bolCliente",!this.bolCliente);
-    }
-
-    accionaNuevoCliente(){
-        var nuevoRazon=this.razon;
-        var nuevoDir=this.direccion;
-        var nuevoTel=this.telefono;
-
-        var t=this;
-
-        var funcionCampos=function(accion) {
-            if(accion.estatus=="error"){
-                if(accion.campo){
-                    
-                    var cajaTexto=t.shadowRoot.querySelector(accion.campo);
-                   
-                    cajaTexto.errorMessage=accion.mensaje;
-                    return cajaTexto.invalid=true;
-                    
+    abreNuevo(){
+        PolymerUtils.Dialog.createAndShow({
+			type: "modal",
+            title:"Nuevo Cliente",
+			element:"dialogo-cliente",
+            style:"width:300px;",
+			positiveButton: {
+                text: "Guardar cambios",
+                action: function(dialog, element) {
+                    element.accionaNuevoCliente();
                 }
-            }else{
-                var cajaTexto=t.shadowRoot.querySelector(accion.campo);
-                cajaTexto.errorMessage="";
-                cajaTexto.invalid=false;
+            },
+            negativeButton: {
+                text: "Cerrar",
+                action: function(dialog, element) {
+                    dialog.close();
+                }
             }
-        }
-
-        var funcionExito=function () {
-            console.log("cliente agregado con exito")
-            
-        }
-        var funcionError=function () {
-            console.log("no se guardo el cliente")
-        }
-
-        objClientes.agregaCliente(nuevoRazon,nuevoDir,nuevoTel,funcionCampos,funcionExito,funcionError);
-       
-
+		});
     }
+
+    editaCliente(e){
+        var elegido=e.model.item;
+        PolymerUtils.Dialog.createAndShow({
+			type: "modal",
+            title:"Cliente elegido",
+            params:[elegido],
+			element:"dialogo-cliente",
+            style:"width:300px;",
+			positiveButton: {
+                text: "Guardar cambios",
+                action: function(dialog, element) {
+                    element.accionaNuevoCliente();
+                }
+            },
+            negativeButton: {
+                text: "Cerrar",
+                action: function(dialog, element) {
+                    dialog.close();
+                }
+            }
+		});
+    }
+
+    eliminaCliente(e){
+        var elegido=e.model.item;
+        PolymerUtils.Dialog.createAndShow({
+			type: "modal",
+            title:"eliminar cliente",
+            message:"El cliente "+elegido.razon+" será borrado del registro. ¿Desea continuar?",
+            style:"width:300px;",
+			positiveButton: {
+                text: "Eliminar",
+                action: function(dialog, element) {
+                    var id=elegido.id;
+                    firebase.firestore().collection("clientes").doc(id).delete().then(() => {
+                        dialog.close();
+                        PolymerUtils.Toast.show("cliente eliminado");
+                    }).catch((error) => {
+                        console.error("Error removing document: ", error);
+                        PolymerUtils.Toast.show("Error. Intentelo más tarde");
+                    });
+                }
+            },
+            negativeButton: {
+                text: "Cerrar",
+                action: function(dialog, element) {
+                    dialog.close();
+                }
+            }
+		});
+    }
+
+ 
+
+    
 }
 
 customElements.define('my-clientes', MyClientes);

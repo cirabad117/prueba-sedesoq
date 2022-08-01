@@ -21,6 +21,9 @@ import '@polymer/app-route/app-route.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-selector/iron-selector.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-toast/paper-toast.js';
+import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/paper-button/paper-button.js';
 import './my-icons.js';
 
 // Gesture events like tap and track generated from touch will not be
@@ -84,9 +87,9 @@ class MyApp extends PolymerElement {
 		<app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
 		  <app-toolbar>Menu</app-toolbar>
 		  <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-			<a name="clientes" href="[[rootPath]]clientes">View One</a>
-			<a name="view2" href="[[rootPath]]view2">View Two</a>
-			<a name="view3" href="[[rootPath]]view3">View Three</a>
+			<a name="clientes" href="[[rootPath]]clientes">Clientes</a>
+			<a name="productos" href="[[rootPath]]productos">Productos</a>
+			<a name="ventas" href="[[rootPath]]ventas">Ventas</a>
 		  </iron-selector>
 		</app-drawer>
 
@@ -101,9 +104,10 @@ class MyApp extends PolymerElement {
 		  </app-header>
 
 		  <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
-			<my-clientes name="clientes"></my-clientes>
-			<my-view2 name="view2"></my-view2>
-			<my-view3 name="view3"></my-view3>
+			<my-clientes name="clientes" lista-clientes="[[listaClientes]]"></my-clientes>
+			<my-productos name="productos" lista-prods="[[listaProds]]"></my-productos>
+			<my-ventas name="ventas" lista-prods="[[listaProds]]" lista-clientes="[[listaClientes]]"></my-ventas>
+			
 			<my-view404 name="view404"></my-view404>
 		  </iron-pages>
 		</app-header-layout>
@@ -113,6 +117,8 @@ class MyApp extends PolymerElement {
 
   static get properties() {
 	return {
+		listaProds:{type:Array, notify:true,value:[]},
+		listaClientes:{type:Array, notify:true,value:[]},
 	  page: {
 		type: String,
 		reflectToAttribute: true,
@@ -121,6 +127,36 @@ class MyApp extends PolymerElement {
 	  routeData: Object,
 	  subroute: Object
 	};
+  }
+
+ 
+  ready() {
+	super.ready();
+	 //usamos esta funcion para desconectar la solicitud a la BD si no esta activa la pagina
+	 if(this.lastClientes){
+		this.lastClientes();
+		this.set("lastClientes",null);
+	}
+
+	//Funcion principal para consulta a la base de datos
+	this.set("lastClientes",DataHelper.queryCollection(this,{
+		"collection":"clientes",
+		"array":this.listaClientes,
+		"arrayName":"listaClientes"
+	}));
+
+	if(this.lastProds){
+		this.lastProds();
+		this.set("lastProds",null);
+	}
+
+	this.set("lastProds",DataHelper.queryCollection(this,{
+		"collection":"productos",
+		"array":this.listaProds,
+		"arrayName":"listaProds"
+	}));
+   
+  
   }
 
   static get observers() {
@@ -136,7 +172,7 @@ class MyApp extends PolymerElement {
 	 // Show 'view1' in that case. And if the page doesn't exist, show 'view404'.
 	if (!page) {
 	  this.page = 'clientes';
-	} else if (['clientes', 'view2', 'view3'].indexOf(page) !== -1) {
+	} else if (['clientes', 'productos', 'ventas'].indexOf(page) !== -1) {
 	  this.page = page;
 	} else {
 	  this.page = 'view404';
@@ -157,11 +193,11 @@ class MyApp extends PolymerElement {
 	  case 'clientes':
 		import('./my-clientes.js');
 		break;
-	  case 'view2':
-		import('./my-view2.js');
+	  case 'productos':
+		import('./my-productos.js');
 		break;
-	  case 'view3':
-		import('./my-view3.js');
+	  case 'ventas':
+		import('./my-ventas.js');
 		break;
 	  case 'view404':
 		import('./my-view404.js');

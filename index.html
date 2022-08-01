@@ -64,21 +64,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="scripts/firebase-firestore.js"></script>
     <script src="scripts/firebase-init.js"></script>
 
-    <script src="scripts/polymer-utils.js"></script>
+    <script src="scripts/database-helper.js"></script>
 
-    <script src="scripts/modelo-auth.js"></script>
-    <script src="scripts/modelo-clientes.js"></script>
+    <script src="scripts/global-utils.js"></script>
+
+    
 
     
 
     
     <script>
-      /** instanciamos nuestras clases en nuevos objetos para trabajar con sus variables y funciones */
-      window.objAuth=new AuthControl()
-      window.objClientes=new ModeloClientes();
-      // var arregloClientes=objClientes.firebaseGetListaClientes();
-      // objClientes.setListaClientes(arregloClientes);
-    </script>
+			window.sharedFirebase=firebase.firestore();
+			var key="principal";
+			console.log("Starting firebase helper",key);
+				try{
+					window.DataHelper=new DataHelperClass(key);
+				
+				}catch(err){
+					console.error("Hubo un error",err);
+				}
+		</script>
 
     <script>
       /**
@@ -122,6 +127,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
+    <div id="unique-main-app-body-dialog-div"></div>
+		<div id="unique-main-app-body-toast-div"></div>
     <my-app></my-app>
     <noscript>
       Please enable JavaScript to view this website.
