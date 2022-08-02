@@ -23,4 +23,28 @@ Entre las funciones solicitadas se encuentran:
 
     https://ccruz-test.web.app/
 
+### BASE DE DATOS
+
+##### la base de datos esta compuesta por 3 colecciones, las cuales estan conformadas de la siguiente forma
+    clientes
+        |-razon (String)
+        |-domicilio (String)
+        |-telefono
+    productos
+        |-nombre (String)
+        |-precio (Number)
+        |-costo (Number)
+        |-inventario (Number)
+    ventas
+        |-fecha (timestamp)
+        |-totalVenta (Number)
+        |-cliente (Object) incluye todos los datos establecido en la coleccion clientes
+        |listaArticulos (Array) dentro de este arreglo se agrupan objetos con la siguiente estructura
+            |cantidad(Number)
+            |idProducto(String)
+            |precio (Number)
+            |producto (String)
+            |subtotal (Number)
+
+
 Cualquier aclaración o duda puede comunicarse directamente con los datos de contacto que suministré en mi CV.
